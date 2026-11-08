@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
+data/
+profiles/
+screenshots/
+*.db
+*.db-journal
+.turbo/
+apps/dashboard/dist/
+apps/api/dist/
+packages/shared/dist/
+playwright-report/
+test-results/
+# Never publish live browser profiles or local secrets
+**/user-data/

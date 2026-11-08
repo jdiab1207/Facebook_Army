@@ -1,0 +1,25 @@
+{
+  "name": "facebook-army",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local Facebook account station for client management via AI API",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "npm run build:shared && concurrently -n api,dash -c blue,magenta \"npm run dev -w @facebook-army/api\" \"npm run dev -w @facebook-army/dashboard\"",
+    "build": "npm run build -w @facebook-army/shared && npm run build -w @facebook-army/api && npm run build -w @facebook-army/dashboard",
+    "start": "npm run start -w @facebook-army/api",
+    "db:generate": "npm run db:generate -w @facebook-army/api",
+    "postinstall": "npm run build -w @facebook-army/shared"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
