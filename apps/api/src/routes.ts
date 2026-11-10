@@ -84,12 +84,26 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
-  // Admin bootstrap: return token only if request comes from localhost and
-  // query matches a one-time local unlock via env already loaded.
+  // Admin bootstrap: allow from localhost or private/Tailscale networks.
+  // Prefer pasting ADMIN_TOKEN when unlocking over untrusted networks.
   app.get("/api/admin/bootstrap", async (req, reply) => {
-    const host = req.hostname;
-    if (host !== "localhost" && host !== "127.0.0.1") {
-      return reply.code(403).send({ error: "Bootstrap only on localhost" });
+    const host = req.hostname || "";
+    const ip = (req.ip || "").replace(/^::ffff:/, "");
+    const allowed =
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      ip === "127.0.0.1" ||
+      ip === "::1" ||
+      /^10\./.test(ip) ||
+      /^192\.168\./.test(ip) ||
+      /^172\.(1[6-9]|2\d|3[0-1])\./.test(ip) ||
+      /^100\.(6[4-9]|[7-9]\d|1[0-1]\d|12[0-7])\./.test(ip); // Tailscale CGNAT
+
+    if (!allowed) {
+      return reply.code(403).send({
+        error:
+          "Auto-unlock blocked on this network. Paste ADMIN_TOKEN from your .env instead.",
+      });
     }
     return {
       adminToken: config.adminToken,

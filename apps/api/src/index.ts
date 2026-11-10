@@ -54,7 +54,10 @@ async function main(): Promise<void> {
 
   await app.listen({ port: config.port, host: config.host });
   console.log(`\n  Facebook Army station listening on http://${config.host}:${config.port}`);
-  console.log(`  Dashboard: http://127.0.0.1:${config.port}`);
+  console.log(`  Local:     http://127.0.0.1:${config.port}`);
+  if (config.host === "0.0.0.0") {
+    console.log(`  Tailscale: http://<your-tailscale-ip>:${config.port}`);
+  }
   console.log(`  Profiles:  ${config.profilesDir}`);
   console.log(`  Data:      ${config.dataDir}\n`);
 

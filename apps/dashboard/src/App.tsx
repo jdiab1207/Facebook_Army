@@ -33,6 +33,7 @@ function screenshotSrc(account: AccountDto): string | null {
 export default function App() {
   const [tokenReady, setTokenReady] = useState(Boolean(getAdminToken()));
   const [bootstrapping, setBootstrapping] = useState(false);
+  const [manualToken, setManualToken] = useState("");
   const [accounts, setAccounts] = useState<AccountDto[]>([]);
   const [jobs, setJobs] = useState<JobDto[]>([]);
   const [keys, setKeys] = useState<ApiKeyDto[]>([]);
@@ -152,6 +153,34 @@ export default function App() {
     }
   };
 
+  const unlockWithToken = () => {
+    const token = manualToken.trim();
+    if (token.length < 8) {
+      setError("Paste the full ADMIN_TOKEN from your .env file");
+      return;
+    }
+    setAdminToken(token);
+    setTokenReady(true);
+    showToast("ok", "Unlocked with ADMIN_TOKEN");
+  };
+
+  const createKeyOrExplain = () => {
+    if (!keyForm.name || !keyForm.clientName || !keyForm.accountIds.length) {
+      showToast(
+        "err",
+        !keyForm.name
+          ? "Enter a key name first"
+          : !keyForm.clientName
+            ? "Enter a client name first"
+            : accounts.length === 0
+              ? "Add an account before creating an API key"
+              : "Check at least one account to allow"
+      );
+      return;
+    }
+    void createKey();
+  };
+
   const createAccount = async () => {
     try {
       setBusyId("create");
@@ -267,6 +296,23 @@ export default function App() {
           {error && <div className="error-banner">{String(error)}</div>}
           <button className="btn primary" onClick={() => void bootstrap()} disabled={bootstrapping}>
             {bootstrapping ? "Connecting…" : "Unlock dashboard"}
+          </button>
+          <div className="field" style={{ marginTop: 18 }}>
+            <label>Or paste ADMIN_TOKEN (for Tailscale)</label>
+            <input
+              value={manualToken}
+              onChange={(e) => setManualToken(e.target.value)}
+              placeholder="From .env on the station machine"
+              autoComplete="off"
+            />
+          </div>
+          <button
+            className="btn"
+            style={{ marginTop: 10 }}
+            onClick={unlockWithToken}
+            disabled={!manualToken.trim()}
+          >
+            Unlock with token
           </button>
         </div>
       </div>
@@ -762,38 +808,73 @@ export default function App() {
                 <input
                   value={keyForm.clientName}
                   onChange={(e) => setKeyForm({ ...keyForm, clientName: e.target.value })}
+                  placeholder="Founder / company"
                 />
               </div>
               <div className="field">
                 <label>Allowed accounts</label>
-                <select
-                  multiple
-                  value={keyForm.accountIds}
-                  onChange={(e) =>
-                    setKeyForm({
-                      ...keyForm,
-                      accountIds: [...e.target.selectedOptions].map((o) => o.value),
-                    })
-                  }
-                  style={{ minHeight: 100 }}
-                >
-                  {accounts.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.label} ({a.clientName})
-                    </option>
-                  ))}
-                </select>
+                {accounts.length === 0 ? (
+                  <p className="tile-sub" style={{ margin: 0 }}>
+                    Add an account first, then come back to create a key.
+                  </p>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="btn ghost"
+                      style={{ marginBottom: 8 }}
+                      onClick={() =>
+                        setKeyForm((prev) => ({
+                          ...prev,
+                          accountIds: accounts.map((a) => a.id),
+                        }))
+                      }
+                    >
+                      Select all accounts
+                    </button>
+                    <div className="account-checkboxes">
+                      {accounts.map((a) => {
+                        const checked = keyForm.accountIds.includes(a.id);
+                        return (
+                          <label key={a.id} className={`check-row ${checked ? "on" : ""}`}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => {
+                                setKeyForm((prev) => ({
+                                  ...prev,
+                                  accountIds: checked
+                                    ? prev.accountIds.filter((id) => id !== a.id)
+                                    : [...prev.accountIds, a.id],
+                                }));
+                              }}
+                            />
+                            <span>
+                              <strong>{a.label}</strong>
+                              <em>{a.clientName}</em>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
+            {(!keyForm.name || !keyForm.clientName || !keyForm.accountIds.length) && (
+              <p className="tile-sub" style={{ margin: "12px 0 0", color: "var(--amber)" }}>
+                {!keyForm.name
+                  ? "Enter a key name"
+                  : !keyForm.clientName
+                    ? "Enter a client name"
+                    : "Check at least one account above (or Select all)"}
+              </p>
+            )}
             <div className="modal-actions">
               <button className="btn ghost" onClick={() => setShowKeys(false)}>
                 Close
               </button>
-              <button
-                className="btn primary"
-                disabled={!keyForm.name || !keyForm.clientName || !keyForm.accountIds.length}
-                onClick={() => void createKey()}
-              >
+              <button className="btn primary" onClick={createKeyOrExplain}>
                 Create key
               </button>
             </div>

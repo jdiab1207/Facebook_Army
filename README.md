@@ -129,7 +129,7 @@ Copy from `.env.example` (or run `npm run setup`):
 | Variable | Purpose |
 |----------|---------|
 | `PORT` | Default `8787` |
-| `HOST` | Default `127.0.0.1` |
+| `HOST` | Default `0.0.0.0` (reachable via Tailscale IP; use `127.0.0.1` to lock local-only) |
 | `MASTER_KEY` | Encrypts stored passwords / proxy secrets |
 | `ADMIN_TOKEN` | Dashboard + admin API auth |
 | `MIN_ACTION_GAP_MS` | Per-account pacing between actions |

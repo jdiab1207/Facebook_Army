@@ -16,7 +16,7 @@ function resolveDir(value: string | undefined, fallback: string): string {
 export const config = {
   rootDir,
   port: Number(process.env.PORT || 8787),
-  host: process.env.HOST || "127.0.0.1",
+  host: process.env.HOST || "0.0.0.0",
   dataDir: resolveDir(process.env.DATA_DIR, "./data"),
   profilesDir: resolveDir(process.env.PROFILES_DIR, "./profiles"),
   screenshotsDir: resolveDir(process.env.SCREENSHOTS_DIR, "./data/screenshots"),

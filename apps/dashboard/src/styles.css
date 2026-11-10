@@ -633,6 +633,52 @@ button {
   margin-top: 18px;
 }
 
+.account-checkboxes {
+  display: grid;
+  gap: 8px;
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+
+.check-row.on {
+  border-color: rgba(230, 179, 90, 0.45);
+  background: var(--amber-soft);
+}
+
+.check-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--amber);
+}
+
+.check-row strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.check-row em {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .setup {
   min-height: 100vh;
   display: grid;
